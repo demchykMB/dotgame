@@ -141,7 +141,7 @@ def runGame():
         text = 'YOU WIN! You beat the computer by %s points!' % \
                (scores[playerTile] - scores[computerTile])
     elif scores[playerTile] < scores[computerTile]:
-        text = 'YOU LOST! The computer beat you by %s points.' % \
+        text = 'YOU LOSE! The computer beat you by %s points.' % \
                (scores[computerTile] - scores[playerTile])
     else:
         text = 'DRAWGAME!'
