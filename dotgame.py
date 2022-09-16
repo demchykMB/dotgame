@@ -1,16 +1,23 @@
 import random, sys, pygame, time, copy
 from pygame.locals import *
+import pygame_menu
+
+pygame.init()
+"""surface - размер картинки главное меню, должно совпадать с 
+размером окна WINDOWWIDTH , WINDOWHEIGHT"""
+surface = pygame.display.set_mode((640, 480))
+bg_image = pygame.image.load('dotgamebg.jpg')#Фон главное меню
 
 FPS = 10
 WINDOWWIDTH = 640
-WINDOWHEIGHT = 480 
-SPACESIZE = 50 
-BOARDWIDTH = 8 
+WINDOWHEIGHT = 480
+SPACESIZE = 50
+BOARDWIDTH = 8
 BOARDHEIGHT = 8
 WHITE_TILE = 'WHITE_TILE' #произвольно-уникальное значение
 BLACK_TILE = 'BLACK_TILE' #произвольно-уникальное значение
 EMPTY_SPACE = 'EMPTY_SPACE' #произвольно-уникальное значение
-HINT_TILE = 'HINT_TILE' #произвольно-уникальное значение 
+HINT_TILE = 'HINT_TILE' #произвольно-уникальное значение
 ANIMATIONSPEED = 25
 
 #количество места игрового поля слева и справа(XFIELD) или сверху и снизу(YFIELD)
@@ -75,16 +82,19 @@ def runGame():
     hintsSurf = FONT.render('HINTS', True, TEXTCOLOR, TEXTBGCOLOR2)
     hintsRect = hintsSurf.get_rect()
     hintsRect.topright = (WINDOWWIDTH - 8, 40)
+    aboutSurf = FONT.render('About', True, TEXTCOLOR, TEXTBGCOLOR2)
+    aboutRest = aboutSurf.get_rect()
+    aboutRest.topright = (WINDOWWIDTH - 8, 80)
 
     while True:
-        
+
         if turn == 'player':
-            
+
             if getValidMoves(mainBoard, playerTile) == []:
                 break
             movexy = None
             while movexy == None:
-                
+
                 if showHints:
                     boardToDraw = getBoardWithValidMoves(mainBoard, playerTile)
                 else:
@@ -107,6 +117,7 @@ def runGame():
 
                 DISPLAYSURF.blit(newGameSurf, newGameRect)
                 DISPLAYSURF.blit(hintsSurf, hintsRect)
+                DISPLAYSURF.blit(aboutSurf, aboutRest)
 
                 MAINCLOCK.tick(FPS)
                 pygame.display.update()
@@ -124,6 +135,7 @@ def runGame():
 
             DISPLAYSURF.blit(newGameSurf, newGameRect)
             DISPLAYSURF.blit(hintsSurf, hintsRect)
+            DISPLAYSURF.blit(aboutSurf, aboutRest)
 
             pauseUntil = time.time() + random.randint(5, 15) * 0.1
             while time.time() < pauseUntil:
@@ -252,7 +264,7 @@ def getSpaceClicked(mousex, mousey):
     return None
 
 
-def drawInfo(board, playerTile, computerTile, turn):
+def drawInfo(board, playerTile, computerTile, turn):#Счетчик игры
     scores = getScoreOfBoard(board)
     scoreSurf = FONT.render("Player Score: %s    Computer Score: %s    %s's Turn" % (str(scores[playerTile]), str(scores[computerTile]), turn.title()), True, TEXTCOLOR)
     scoreRect = scoreSurf.get_rect()
@@ -278,7 +290,7 @@ def getNewBoard():
 
     return board
 
-
+#Допустимые ходы
 def isValidMove(board, tile, xstart, ystart):
     if board[xstart][ystart] != EMPTY_SPACE or not isOnBoard(xstart, ystart):
         return False
@@ -354,7 +366,7 @@ def getScoreOfBoard(board):
                 oscore += 1
     return {WHITE_TILE:xscore, BLACK_TILE:oscore}
 
-
+"""вывести в главное меню для выбора"""
 def enterPlayerTile():
 
     textSurf = FONT.render('CHOOSE YOUR COLOR:', True, TEXTCOLOR, TEXTBGCOLOR1)
@@ -436,7 +448,37 @@ def checkForQuit():
         if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
             pygame.quit()
             sys.exit()
+#Главное меню
 
+frame_color=pygame_menu.themes.THEME_DARK.copy()#Тема рамки
+frame_color.set_background_color_opacity(0.4)#Прозрачность темы
 
-if __name__ == '__main__':
-    main()
+menu = pygame_menu.Menu('DotGame', 400, 300,
+                       theme=frame_color)# Название \ размер главное меню
+# Кнопки главное меню
+menu.add.text_input('Your name : ', default='')
+menu.add.button('Play', main)
+menu.add.button('Quit', pygame_menu.events.EXIT)
+"""Добавить  
+игрок выберает играть с компьютером или player2
+
+"""
+while True:
+
+    surface.blit(bg_image, (0, 0))
+
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            exit()
+
+    if menu.is_enabled():
+        menu.update(events)
+        menu.draw(surface)
+
+    pygame.display.update()
+
+#########################################################################
+
+# if __name__ == '__main__':
+#     main()
